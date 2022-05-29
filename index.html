@@ -16,18 +16,21 @@
   <form class="formulario">
     <h3>Costo general</h3>
     <label for="numart">Número de articulos:</label>
-    <input type="number" id="numart" name="numart" min="1">
+    <input type="number" id="numart" name="numart" min="1" required>
     <label for="costo">Costo total:</label>
-    <input type="number" id="cost" name="costo" min="1">
+    <input type="number" id="cost" name="costo" min="1" required>
     <label for="envio">Costo de envío:</label>
     <input type="number" id="envio" name="envio" min="0">
     <label for="ganancia">Ganancia (%):</label>
-    <input type="number" id="ganancia" name="ganancia" min="1">
+    <input type="number" id="ganancia" name="ganancia" min="1" required>
     <hr>
     <h3>Productos</h3>
-    <div class="products">
-      <label for="prod1">Costo total producto 1:</label>
+    <div id="products">
+      <!-- <label for="prod1">Costo total producto 1:</label>
       <input type="number" id="prod1" name="prod1" min="1">
+      <label for="cup1">Cantidad (piezas/litros) de producto 1:</label>
+      <input type="number" data-pzs="0" id="cup1" name="cup1" min="1">
+      <h4 id="precio">Precio de venta (piezas/litro):</h4> -->
     </div>
   </form>
   <script src="scripts.js"></script>
