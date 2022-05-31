@@ -9,3 +9,116 @@
 header {
   background: gray;
 }
+
+h3 {
+  margin: 0;
+  padding: .5em 0;
+}
+
+.form-style {
+  width: 95%;
+  margin: 10px auto;  
+}
+
+.form-style fieldset {
+  margin: 0px 0px 10px 0px;
+	padding: 12px;
+	border: 1px solid #6096ba;
+  border-radius: 10px;
+}
+
+.form-style fieldset legend {
+  padding: 0px 12px;
+  margin-left: 1em;
+  border-top: 1px solid #6096ba;
+	border-left: 1px solid #6096ba;
+	border-right: 1px solid #6096ba;
+	border-radius: 5px 5px 0px 0px;
+}
+
+.tabla {
+  margin: 2px;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(13.6em, 1fr));
+}
+
+
+.tabla label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tabla label > span {
+	color: #0c1821;
+	font-weight: bold;
+	text-shadow: 1px 1px 1px #fff;
+}
+
+.tabla input[type=number]{
+  width: 100px;
+  margin-right: 1em;
+	padding: 5px 8px 5px 8px;  
+  border-radius: 5px;
+  border: 1px solid #324a5f;
+	color: #1b2a41;
+	box-shadow: inset 1px 1px 4px #cde5d7;
+}
+
+.requerido{
+	color:red;
+	font-weight: normal;
+}
+
+.row {
+  margin: 2px;
+  display: grid;
+  grid-gap: 6px;
+  grid-template-columns: repeat(5, minmax(min-content,1fr)); 
+}
+
+.titulo {
+  border-radius: 10px 10px 0px 0px;
+  color: #BBB;
+  background-color: #1b2a41;
+}
+
+.titulo:not(small) {
+  font-size: 1.1em;
+}
+
+.row .cel {  
+  height: 60px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.row input {
+  width: 60px;
+  font-size: 14px;
+  padding: 7px 5px;
+  border-radius: 5px;
+  border: 1px solid #324a5f;
+  color: #1b2a41;
+  box-shadow: inset 1px 1px 4px #cde5d7;
+}
+
+.cel small {
+  margin-top: 4px;
+}
+
+.row:nth-child(odd) {
+	background-color: #bdbcbc;
+}
+
+.row:not(.titulo):nth-child(even) {
+	background-color: #e7ecef;
+}
+.totales{
+  border-radius: 0px 0px 10px 10px;
+  font-weight: bold;
+  background-color: #6096ba !important;
+}

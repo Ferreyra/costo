@@ -3,45 +3,69 @@ const inputArticulos = document.getElementById('numart')
 const inputCosto = document.getElementById('cost')
 const inputEnvio = document.getElementById('envio')
 const inputGanacia = document.getElementById('ganancia')
+const tablaProductos = document.getElementById('tpp')
 
 let numArticulos
 let costoTotal = 0
 let envio = 0
 let ganancia = 0
 
-function precio() {  
-  let item = 'prod' + this.attributes[1].value
+function calcPrecio() { 
+  console.log('precio ') 
+  let item = 'prod' + this.attributes['data-pzs'].value
   let costoPiezas = document.getElementById(item).value
-  let precioUnitario = (costoPiezas/this.value)
-  let precioVenta = precioUnitario * (1 + (ganancia/100))
+  let costoUnitario = (costoPiezas/this.value)
+  
+  let precioVenta = costoUnitario * (1 + (ganancia/100))
   if (envio) {
     precioVenta += (envio/numArticulos)/this.value
   }
-  const precioElem = document.createElement('h4')
-  precioElem.innerHTML = `
-    <h4>Precio unitario: ${precioUnitario} \t Precio de venta: <strong>${precioVenta}</strong>
-  `
-  this.parentElement.appendChild(precioElem)
+  console.log(precioVenta)
+  let concatIdPrecio = 'precioU' + this.attributes['data-pzs'].value
+  let concatIdCosto = 'costU' + this.attributes['data-pzs'].value
+  const costoElemt = document.getElementById(concatIdCosto)
+  const precioElemt = document.getElementById(concatIdPrecio)
+  costoElemt.innerHTML = `$ ${costoUnitario}`
+  precioElemt.innerHTML = `$ ${precioVenta}`  
 }
 
 inputArticulos.addEventListener('focusout', () => {
   numArticulos = inputArticulos.value
 
   if (numArticulos >= 1) {
+    tablaProductos.removeAttribute('style')
     for (let articulo = 1; articulo <= numArticulos; articulo++) {
       productosParent.innerHTML += `
-        <div>
-          <h4>Producto ${articulo}</h4>
-          <label for="prod${articulo}">Costo total:</label>
-          <input type="number" id="prod${articulo}" name="prod${articulo}" min="1" required>
-          <label for="cup${articulo}">Cantidad (piezas/litros):</label>
-          <input type="number" data-pzs=${articulo} id="cup${articulo}" name="cup${articulo}" min="1" required>
-        </div>
+        <div class="row">
+          <div class="cel">Productos ${articulo}<small>Descripción</small></div>
+          <div class="cel">
+            <label for="prod${articulo}">
+              <input type="number" class="cost" id="prod${articulo}" name="prod${articulo}" min="1">
+            </label>
+          </div>
+          <div class="cel">
+            <label for="cup${articulo}">
+              <input type="number" class="cant" data-pzs=${articulo} id="cup${articulo}" name="cup${articulo}" min="1">
+            </label>
+          </div>
+          <div class="cel" id="costU${articulo}">$</div>
+          <div class="cel" id="precioU${articulo}">$</div>
+        </div>        
       `      
     }
+    /*productosParent.innerHTML += `
+      <div class="row totales">
+        <div class="cel">Total</div>
+        <div class="cel">$ 00</div>
+        <div class="cel">00</div>
+        <div class="cel">$ ++</div>
+        <div class="cel">$ +++</div>
+      </div>
+    `*/
     const inputPiezas = document.querySelectorAll('[data-pzs]')
     inputPiezas.forEach(input => {
-      input.addEventListener('focusout', precio)
+      console.log('addEvent')
+      input.addEventListener('focusout', calcPrecio)
     });
   }
 })
