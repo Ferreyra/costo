@@ -25,8 +25,8 @@ function calcPrecio() {
   let concatIdCosto = 'costU' + this.attributes['data-pzs'].value
   const costoElemt = document.getElementById(concatIdCosto)
   const precioElemt = document.getElementById(concatIdPrecio)
-  costoElemt.innerHTML = `$ ${costoUnitario}`
-  precioElemt.innerHTML = `$ ${precioVenta}`  
+  costoElemt.innerHTML = `$ ${costoUnitario.toFixed(1)}`
+  precioElemt.innerHTML = `$ ${precioVenta.toFixed(1)}`  
 }
 
 inputArticulos.addEventListener('focusout', () => {
