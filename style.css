@@ -6,11 +6,7 @@
   margin: 0;
 } */
 
-header {
-  background: gray;
-}
-
-h3 {
+h3, h5, p {
   margin: 0;
   padding: .5em 0;
 }
@@ -71,6 +67,20 @@ h3 {
 	font-weight: normal;
 }
 
+.guia {
+  box-sizing: border-box;
+  width: 95%;
+  padding: .3em .8rem;
+  margin: 20px auto;
+  border: 1px solid #6096ba;
+  border-radius: 10px;
+  text-align: justify;
+  background: #8d96b6;
+}
+.guia p {
+  font-size: .8em;
+}
+
 .row {
   margin: 2px;
   display: grid;
@@ -86,6 +96,7 @@ h3 {
 
 .titulo:not(small) {
   font-size: 1.1em;
+  
 }
 
 .row .cel {  
