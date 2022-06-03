@@ -6,62 +6,88 @@ const inputGanacia = document.getElementById('ganancia')
 const tablaProductos = document.getElementById('tpp')
 const guia = document.getElementById('txtGuia')
 
-let numArticulos
-let articulosIngredados = 0
-let costoTotal = 0
-let envio = 0
-let ganancia = 0
-
-function calcPrecio(refProd) {   
-  if (refProd.target !== undefined)
-    refProd = this   
-  let item = 'prod' + refProd.attributes['data-pzs'].value
-  let costoPiezas = document.getElementById(item).value
-// TODO: validar costoPiezas 
-  let costoUnitario = (costoPiezas/refProd.value)  
-  let precioVenta = costoUnitario * (1 + (ganancia/100))
-  if (envio) 
-    precioVenta += (envio/numArticulos)/refProd.value
-  
-  let idPrecio = 'precioU' + refProd.attributes['data-pzs'].value
-  let idCosto = 'costU' + refProd.attributes['data-pzs'].value
-
-  const costoElemt = document.getElementById(idCosto)
-  const precioElemt = document.getElementById(idPrecio)
-  costoElemt.innerHTML = `$ ${costoUnitario.toFixed(1)}`
-  precioElemt.innerHTML = `$ ${precioVenta.toFixed(1)}`
-
-
-  const precioElements = document.getElementsByClassName('cel precio')
-  let sumaPrecios = 0
-  for (const precioElement of precioElements) {
-    if (precioElement.textContent !== "$") {
-      let strP = precioElement.textContent.split(' ')
-      console.log(parseFloat(strP[1]))
-      sumaPrecios += parseFloat(strP[1]) * refProd.value
+class Producto {
+  constructor(nom, cost, cant, desc) {
+  this.nombre = nom
+  this.descripcion = desc
+  this.costo = cost
+  this.cantidad =cant
+  }
+  costUnit = 0.0
+  precio = 0.0
+  calcPrecio(ganancia, costEnv) {
+    if (this.costo > 0 && this.cantidad > 0) {
+      this.costUnit = this.costo / this.cantidad
+      if (costEnv > 0)
+        costEnv = costEnv/this.cantidad
+      return costEnv + this.costUnit * (1 + (ganancia/100))
     }
   }
-  console.log('suma precios:', sumaPrecios)
+}
 
-  const costoElements = document.getElementsByClassName('cost')
-  let sumaCostos = 0
-  for (const costoIngresado of costoElements) {
-    if (costoIngresado.value)
-      sumaCostos += parseFloat(costoIngresado.value)
+const listaPrecios = {
+  numPoductos: number = 0,
+  costo: float = 0,
+  envio: float = 0,
+  ganancia: number = 50,
+  ganaciaVenta: float = 0,
+  producto: [],
+  calcGanancia() {
+    if (this.producto.length > 0) {
+      this.ganaciaVenta = 0
+      this.producto.forEach(prod => {
+        if (prod.costo && prod.cantidad)
+        this.ganaciaVenta += (prod.calcPrecio(this.ganancia, this.envio/prod.cantidad) * prod.cantidad) - prod.costo
+      })
+    }
   }
-  console.log(sumaCostos)
-  console.log('ganancia:', sumaPrecios -  sumaCostos)
+}
+
+function cambPrecio(item, costoE, precioE) { 
+  let idPrecio = 'precioU' + item
+  let idCosto = 'costU' + item
+  const costoElemt = document.getElementById(idCosto)
+  const precioElemt = document.getElementById(idPrecio)
+  costoElemt.innerHTML = `$ ${costoE.toFixed(1)}`
+  precioElemt.innerHTML = `$ ${precioE.toFixed(1)}`
+ }
+
+function actulizarLista(refProd) {     
+  if (refProd.target !== undefined)
+    refProd = this
+
+  let strId = String(refProd.attributes['id'].value)
+  let item = parseInt(strId.substring(strId.length - 1)) - 1
+  const productoSel = listaPrecios.producto[item]
+  console.log(productoSel)
+
+  let esCosto = strId.substring(0, 4) 
+  if (esCosto === 'cost') {
+    productoSel.costo = refProd.value
+    if (productoSel.cantidad > 0) {
+      productoSel.precio = productoSel.calcPrecio(listaPrecios.ganancia, listaPrecios.envio/listaPrecios.numPoductos)
+      cambPrecio(item+1, productoSel.costUnit, productoSel.precio)
+    }
+  }
+  if (esCosto === 'cant') {
+    productoSel.cantidad = refProd.value
+    if (productoSel.costo > 0) {
+      productoSel.precio = productoSel.calcPrecio(listaPrecios.ganancia, listaPrecios.envio/listaPrecios.numPoductos)
+      cambPrecio(item+1, productoSel.costUnit, productoSel.precio)
+    }
+  }  
 }
 
 function logKey(e) {
   if (e.keyCode === 13)
     if (this.value)
-      calcPrecio(this)
+      actulizarLista(this)
 }
 
 inputArticulos.addEventListener('focus', () => {
   const childConunt = productosParent.childElementCount
   if (childConunt > 2) {
+    tablaProductos.style.display = 'none'
     for (let index = childConunt-1; index > 1; --index) {
       if (productosParent.children[index].attributes['class'].value == 'row')
         productosParent.children[index].remove()
@@ -71,22 +97,27 @@ inputArticulos.addEventListener('focus', () => {
 
 inputArticulos.addEventListener('focusout', () => {
   numArticulos = inputArticulos.value
+  listaPrecios.numPoductos = inputArticulos.value
 
-  if (numArticulos >= 1) {
+  for (let index = 0; index < listaPrecios.numPoductos; index++) {
+    listaPrecios.producto.push(new Producto('Producto ' + (index + 1)))    
+  }
+
+  if (listaPrecios.numPoductos >= 1) {
     tablaProductos.removeAttribute('style')
     guia.style.display = 'none'
-    for (let articulo = 1; articulo <= numArticulos; articulo++) {
+    for (let articulo = 1; articulo <= listaPrecios.numPoductos; articulo++) {
       productosParent.innerHTML += `
         <div class="row">
           <div class="cel">Productos ${articulo}<small>Descripción</small></div>
           <div class="cel">
-            <label for="prod${articulo}">
-              <input type="number" class="cost" id="prod${articulo}" name="prod${articulo}" min="1">
+            <label for="cost${articulo}">
+              <input type="number" class="cost" id="cost${articulo}" name="cost${articulo}" min="1">
             </label>
           </div>
           <div class="cel">
-            <label for="cup${articulo}">
-              <input type="number" class="cant" data-pzs=${articulo} id="cup${articulo}" name="cup${articulo}" min="1">
+            <label for="cant${articulo}">
+              <input type="number" class="cant" data-pzs=${articulo} id="cant${articulo}" name="cant${articulo}" min="1">
             </label>
           </div>
           <div class="cel" id="costU${articulo}">$</div>
@@ -103,23 +134,23 @@ inputArticulos.addEventListener('focusout', () => {
         <div class="cel">$ +++</div>
       </div>
     `*/
-    const inputPiezas = document.querySelectorAll('[data-pzs]')
-    inputPiezas.forEach(input => {
-      input.addEventListener('focusout', calcPrecio)
+    const inputsProduct = productosParent.querySelectorAll('input')    
+    inputsProduct.forEach(input => {
+      input.addEventListener('focusout', actulizarLista)
       input.addEventListener('keyup', logKey)
     });
   }
 })
 
 inputCosto.addEventListener('focusout', () => {  
-  costoTotal = inputCosto.value
+  listaPrecios.costo = inputCosto.value
 })
 
 inputEnvio.addEventListener('focusout', () => {
-  envio = inputEnvio.value
+  listaPrecios.envio = inputEnvio.value
 })
 
 inputGanacia.addEventListener('focusout', () => {
-  ganancia = inputGanacia.value
+  listaPrecios.ganancia = inputGanacia.value
 })
 
