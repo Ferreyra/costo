@@ -1,12 +1,4 @@
-/* *,
-:before,
-:after {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-} */
-
-h3, h5, p {
+h3, h4, h5, p {
   margin: 0;
   padding: .5em 0;
 }
@@ -82,49 +74,54 @@ h3, h5, p {
 }
 
 .row {
-  margin: 2px;
-  display: grid;
-  grid-gap: 6px;
-  grid-template-columns: repeat(5, minmax(min-content,1fr)); 
+  height: auto;
+  display: grid;  
+  grid-template-columns: repeat(6, 1fr);
 }
 
 .titulo {
   border-radius: 10px 10px 0px 0px;
   color: #BBB;
-  background-color: #1b2a41;
+  background-color: #1b2a41 !important;
 }
 
 .titulo:not(small) {
-  font-size: 1.1em;
-  
+  font-size: 1.1em;  
 }
 
 .row .cel {  
-  height: 60px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
+  margin: 0;
+  padding: .5em .8em;
+  align-self: center;
 }
-
-.row input {
-  width: 60px;
-  font-size: 14px;
-  padding: 7px 5px;
-  border-radius: 5px;
+.cel label > input {
+  width: 5em;
+  height: 1.8em;
+  padding: 0.3em 0.5em;
+  border-radius: .5em;
+  text-align: center;
   border: 1px solid #324a5f;
   color: #1b2a41;
   box-shadow: inset 1px 1px 4px #cde5d7;
 }
-
-.cel small {
-  margin-top: 4px;
+.row > .cel > span {
+  display: none;
 }
-
+.row > .cel > small,
+.cel h4 > small {
+  display: block;
+  margin-top: .4em;
+}
+ 
+.cel:first-child {
+  grid-column: span 2;
+}
+.cel:not(:first-child) {
+  justify-self: center;
+}
 .row:nth-child(odd) {
 	background-color: #bdbcbc;
 }
-
 .row:not(.titulo):nth-child(even) {
 	background-color: #e7ecef;
 }
@@ -132,4 +129,52 @@ h3, h5, p {
   border-radius: 0px 0px 10px 10px;
   font-weight: bold;
   background-color: #6096ba !important;
+}
+
+@media screen and (max-width: 650px) {
+  .table {
+    width: 85%;
+    margin: 0 auto;
+    display: grid;
+    grid-gap: .5em;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  .table > .titulo {
+    display: none;
+  }  
+  .table > .row:not(.titulo) {
+    display: block;
+    margin: 0.5em 0;
+  }
+  .table > .row:not(:first-child) > .cel:first-child {
+    border-radius: 1em 1em 0 0;
+    color: #BBB;
+    border-top: none;
+    background-color: #1b2a41 !important;
+  }
+  .table > .row {
+    border-radius: 1em 1em 1em 1em;    
+  }
+  .row > .cel > span {
+    display: inline;
+    padding-left: 1rem;
+    font-weight: bold;
+    text-align: start;
+  }
+  .cel {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    align-items: center;
+    border-top: 1px solid #000;
+  }
+  .cel:not(:first-child) {
+    text-align: center;
+  }
+  .cel:nth-child(4),
+  .cel:nth-child(5) {
+    padding-right: 2em;
+  }
+  .cel label > input {
+    width: 80%;
+  }
 }
