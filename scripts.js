@@ -17,10 +17,13 @@ class Producto {
   precio = 0.0
   calcPrecio(ganancia, costEnv) {
     if (this.costo > 0 && this.cantidad > 0) {
+      let gptj = ganancia/100
       this.costUnit = this.costo / this.cantidad
+      gptj *= this.costUnit
+      gptj += this.costUnit
       if (costEnv > 0)
         costEnv = costEnv/this.cantidad
-      return costEnv + this.costUnit * (1 + (ganancia/100))
+      return costEnv + gptj
     }
   }
 }
@@ -37,7 +40,7 @@ const listaPrecios = {
       this.ganaciaVenta = 0
       this.producto.forEach(prod => {
         if (prod.costo && prod.cantidad)
-        this.ganaciaVenta += (prod.calcPrecio(this.ganancia, this.envio/prod.cantidad) * prod.cantidad) - prod.costo
+        this.ganaciaVenta += (prod.calcPrecio(this.ganancia, this.envio/this.numPoductos) * prod.cantidad) - prod.costo
       })
     }
   }
@@ -48,9 +51,9 @@ function cambPrecio(item, costoE, precioE) {
   let idCosto = 'costU' + item
   const costoElemt = document.getElementById(idCosto)
   const precioElemt = document.getElementById(idPrecio)
-  costoElemt.innerHTML = `$ ${costoE.toFixed(1)}`
-  precioElemt.innerHTML = `$ ${precioE.toFixed(1)}`
- }
+  costoElemt.innerHTML = `<span>Costo unitario</span>$ ${costoE.toFixed(1)}`
+  precioElemt.innerHTML = `<span>Precio venta</span>$ ${precioE.toFixed(1)}`
+}
 
 function actulizarLista(refProd) {     
   if (refProd.target !== undefined)
@@ -78,93 +81,101 @@ function actulizarLista(refProd) {
 }
 
 function logKey(e) {
-  if (e.keyCode === 13)
-    if (this.value)
-      actulizarLista(this)
+  if (e.key === "Enter" & this.value)
+    actulizarLista(this)
 }
 
-inputArticulos.addEventListener('focus', () => {
-  const childConunt = productosParent.childElementCount
-  if (childConunt > 1) {
-    tablaProductos.style.display = 'none'
-    for (let index = childConunt-1; index > 1; --index) {
-      if (productosParent.children[index].attributes['class'].value == 'row')
-        productosParent.children[index].remove()
-    }    
+function fProductos() {
+  let nArticulos, ix = 0  
+  if (listaPrecios.numPoductos > 0) {
+    while (listaPrecios.numPoductos > inputArticulos.value) {
+      listaPrecios.producto.pop()
+      productosParent.children[listaPrecios.numPoductos].remove()
+      listaPrecios.numPoductos--
+    }
+    if (listaPrecios.numPoductos < inputArticulos.value){
+      nArticulos = inputArticulos.value - listaPrecios.numPoductos
+      ix = parseInt(listaPrecios.numPoductos)
+    }
+  } else {
+    nArticulos = inputArticulos.value
+    tablaProductos.removeAttribute('style')
   }
-})
+  listaPrecios.numPoductos = inputArticulos.value
+  if (nArticulos >= 1) {      
+    guia.style.display = 'none'
+    for (let articulo = 1; articulo <= nArticulos; articulo++) {
+      listaPrecios.producto.push(new Producto('Producto ' + (ix + articulo)))
+      productosParent.innerHTML += `
+        <div class="row">
+          <div class="cel"><span>Producto</span><h4>Producto ${ix + articulo} <small>Descripción</small></h4></div>
+          <div class="cel">
+            <span>Costo</span>
+            <label for="cost${ix + articulo}">
+              <input type="number" class="cost" id="cost${ix + articulo}" name="cost${ix + articulo}" min="1">
+            </label>
+          </div>
+          <div class="cel">
+            <span>Cantidad</span>
+            <label for="cant${ix + articulo}">
+              <input type="number" class="cant" data-pzs=${ix + articulo} id="cant${ix + articulo}" name="cant${ix + articulo}" min="1">
+            </label>
+          </div>
+          <div class="cel" id="costU${ix + articulo}"><span>Costo unitario</span>$</div>
+          <div class="cel precio" id="precioU${ix + articulo}"><span>Precio venta</span>$</div>
+        </div>        
+      `      
+    }
+    /*productosParent.innerHTML += `
+      <div class="row totales">
+        <div class="cel">Total</div>
+        <div class="cel">$ 00</div>
+        <div class="cel">00</div>
+        <div class="cel">$ ++</div>
+        <div class="cel">$ +++</div>
+      </div>
+    `*/
+    const inputsProduct = productosParent.querySelectorAll('input')    
+    inputsProduct.forEach(input => {
+      input.addEventListener('focusout', actulizarLista)
+      input.addEventListener('keyup', logKey)
+    });
+  }  
+}
 
 inputArticulos.addEventListener('focusout', () => {
-  if (inputArticulos.value) {
-    listaPrecios.numPoductos = inputArticulos.value
-
-    for (let index = 0; index < listaPrecios.numPoductos; index++) {
-      listaPrecios.producto.push(new Producto('Producto ' + (index + 1)))    
-    }
-
-    if (listaPrecios.numPoductos >= 1) {
-      tablaProductos.removeAttribute('style')
-      guia.style.display = 'none'
-      for (let articulo = 1; articulo <= listaPrecios.numPoductos; articulo++) {
-        productosParent.innerHTML += `
-          <div class="row">
-            <div class="cel"><span>Producto</span><h4>Producto ${articulo} <small>Descripción</small></h4></div>
-            <div class="cel">
-              <span>Costo</span>
-              <label for="cost${articulo}">
-                <input type="number" class="cost" id="cost${articulo}" name="cost${articulo}" min="1">
-              </label>
-            </div>
-            <div class="cel">
-              <span>Cantidad</span>
-              <label for="cant${articulo}">
-                <input type="number" class="cant" data-pzs=${articulo} id="cant${articulo}" name="cant${articulo}" min="1">
-              </label>
-            </div>
-            <div class="cel" id="costU${articulo}"><span>Costo unitario</span>$</div>
-            <div class="cel precio" id="precioU${articulo}"><span>Precio venta</span>$</div>
-          </div>        
-        `      
-      }
-      /*productosParent.innerHTML += `
-        <div class="row totales">
-          <div class="cel">Total</div>
-          <div class="cel">$ 00</div>
-          <div class="cel">00</div>
-          <div class="cel">$ ++</div>
-          <div class="cel">$ +++</div>
-        </div>
-      `*/
-      const inputsProduct = productosParent.querySelectorAll('input')    
-      inputsProduct.forEach(input => {
-        input.addEventListener('focusout', actulizarLista)
-        input.addEventListener('keyup', logKey)
-      });
-    }
-  }
+  if (inputArticulos.value)
+    fProductos()
+})
+inputArticulos.addEventListener('keyup', (key) => {
+  if (key.key === "Enter" & inputArticulos.value)
+    fProductos()
 })
 
 inputCosto.addEventListener('focusout', () => {
   if (inputCosto.value)
     listaPrecios.costo = inputCosto.value
 })
+inputCosto.addEventListener('keyup', (key) => {
+  if (key.key === "Enter" & inputCosto.value)
+    listaPrecios.costo = inputCosto.value
+})
 
 inputEnvio.addEventListener('focusout', () => {
-  if (inputGanacia.value)
+  if (inputEnvio.value)
     listaPrecios.envio = inputEnvio.value
 })
 
 inputEnvio.addEventListener('keyup', (key) => {
-  if (key.key === "Enter")
-    if (inputEnvio.value) {
-      listaPrecios.envio = inputEnvio.value
-      const listPrcios = productosParent.getElementsByClassName('cant')
-      if (listPrcios.length > 0) {
-        for(let producto of listPrcios) {
-          actulizarLista(producto)
-        }
+  if (key.key === "Enter" & inputEnvio.value) {
+    listaPrecios.envio = inputEnvio.value
+    const listPrcios = productosParent.getElementsByClassName('cant')
+    if (listPrcios.length > 0) {
+      for(let producto of listPrcios) {
+        actulizarLista(producto)
       }
     }
+  }
 })
 
 inputGanacia.addEventListener('focusout', () => {
@@ -173,14 +184,13 @@ inputGanacia.addEventListener('focusout', () => {
 })
 
 inputGanacia.addEventListener('keyup', (key) => {
-  if (key.key === "Enter")
-    if (inputGanacia.value) {
-      listaPrecios.ganancia = inputGanacia.value
-      const listPrcios = productosParent.getElementsByClassName('cant')
-      if (listPrcios.length > 0) {
-        for(let producto of listPrcios) {
-          actulizarLista(producto)
-        }
+  if (key.key === "Enter" & inputGanacia.value) {
+    listaPrecios.ganancia = inputGanacia.value
+    const listPrcios = productosParent.getElementsByClassName('cant')
+    if (listPrcios.length > 0) {
+      for(let producto of listPrcios) {
+        actulizarLista(producto)
       }
     }
+  }
 })
