@@ -2,7 +2,7 @@ const productosParent = document.getElementById('products')
 const inputArticulos = document.getElementById('numart')
 const inputCosto = document.getElementById('cost')
 const inputEnvio = document.getElementById('envio')
-const inputGanacia = document.getElementById('ganancia')
+const inputGanacia = document.getElementById('porcentajeGanancia')
 const tablaProductos = document.getElementById('tpp')
 const guia = document.getElementById('txtGuia')
 
@@ -18,12 +18,12 @@ class Producto {
   calcPrecio(ganancia, costEnv) {
     if (this.costo > 0 && this.cantidad > 0) {
       let gptj = ganancia/100
-      this.costUnit = this.costo / this.cantidad
+      this.costUnit = parseFloat((this.costo / this.cantidad).toFixed(2))
       gptj *= this.costUnit
       gptj += this.costUnit
       if (costEnv > 0)
         costEnv = costEnv/this.cantidad
-      return costEnv + gptj
+      return parseFloat((costEnv + gptj).toFixed(1))
     }
   }
 }
@@ -40,8 +40,10 @@ const listaPrecios = {
       this.ganaciaVenta = 0
       this.producto.forEach(prod => {
         if (prod.costo && prod.cantidad)
-        this.ganaciaVenta += (prod.calcPrecio(this.ganancia, this.envio/this.numPoductos) * prod.cantidad) - prod.costo
+          this.ganaciaVenta += (prod.calcPrecio(this.ganancia, this.envio/this.numPoductos) * prod.cantidad) - prod.costo
       })
+      this.ganaciaVenta = parseFloat(this.ganaciaVenta.toFixed(1))
+      this.ganaciaVenta = this.ganaciaVenta - this.envio
     }
   }
 }
@@ -51,37 +53,47 @@ function cambPrecio(item, costoE, precioE) {
   let idCosto = 'costU' + item
   const costoElemt = document.getElementById(idCosto)
   const precioElemt = document.getElementById(idPrecio)
-  costoElemt.innerHTML = `<span>Costo unitario</span>$ ${costoE.toFixed(1)}`
-  precioElemt.innerHTML = `<span>Precio venta</span>$ ${precioE.toFixed(1)}`
+  costoElemt.innerHTML = `<span>Costo unitario</span>$ ${costoE}`
+  precioElemt.innerHTML = `<span>Precio venta</span>$ ${precioE}`
 }
 
 function actulizarLista(refProd) {     
   if (refProd.target !== undefined)
     refProd = this
-
+ 
   let strId = String(refProd.attributes['id'].value)
   let item = parseInt(strId.substring(strId.length - 1))
   const productoSel = listaPrecios.producto[item - 1]
 
   let esCosto = strId.substring(0, 4) 
-  if (esCosto === 'cost') {
-    productoSel.costo = refProd.value
+  if (esCosto === 'cost' && refProd.value) {
+    productoSel.costo = parseFloat(refProd.value)
     if (productoSel.cantidad > 0) {
       productoSel.precio = productoSel.calcPrecio(listaPrecios.ganancia, listaPrecios.envio/listaPrecios.numPoductos)
       cambPrecio(item, productoSel.costUnit, productoSel.precio)
     }
   }
-  if (esCosto === 'cant') {
-    productoSel.cantidad = refProd.value
+  if (esCosto === 'cant' && refProd.value) {
+    productoSel.cantidad = parseFloat(refProd.value)
     if (productoSel.costo > 0) {
       productoSel.precio = productoSel.calcPrecio(listaPrecios.ganancia, listaPrecios.envio/listaPrecios.numPoductos)
       cambPrecio(item, productoSel.costUnit, productoSel.precio)
     }
-  }  
+  }
+
+  const sumaCostos = listaPrecios.producto.reduce( (a, b) => a.costo + b.costo )
+  console.log(sumaCostos)
+  if (sumaCostos /*&& sumaCostos === listaPrecios.costo*/) {
+    listaPrecios.calcGanancia()
+    console.log('Ganancia', listaPrecios.ganaciaVenta)
+    const gananciaElemt = document.getElementById('ganancia')
+    gananciaElemt.style.display = 'grid'
+    gananciaElemt.lastElementChild.textContent = `$ ${listaPrecios.ganaciaVenta}`
+  }
 }
 
 function logKey(e) {
-  if (e.key === "Enter" & this.value)
+  if (e.key === "Enter" && this.value)
     actulizarLista(this)
 }
 
@@ -103,7 +115,7 @@ function fProductos() {
   }
   listaPrecios.numPoductos = inputArticulos.value
   if (nArticulos >= 1) {      
-    guia.style.display = 'none'
+    guia.style.display = 'none'    
     for (let articulo = 1; articulo <= nArticulos; articulo++) {
       listaPrecios.producto.push(new Producto('Producto ' + (ix + articulo)))
       productosParent.innerHTML += `
@@ -124,22 +136,21 @@ function fProductos() {
           <div class="cel" id="costU${ix + articulo}"><span>Costo unitario</span>$</div>
           <div class="cel precio" id="precioU${ix + articulo}"><span>Precio venta</span>$</div>
         </div>        
-      `      
+      `
     }
-    /*productosParent.innerHTML += `
-      <div class="row totales">
-        <div class="cel">Total</div>
-        <div class="cel">$ 00</div>
-        <div class="cel">00</div>
-        <div class="cel">$ ++</div>
-        <div class="cel">$ +++</div>
-      </div>
-    `*/
-    const inputsProduct = productosParent.querySelectorAll('input')    
-    inputsProduct.forEach(input => {
-      input.addEventListener('focusout', actulizarLista)
-      input.addEventListener('keyup', logKey)
-    });
+    for (let xinp = 0; xinp < ix; xinp++) {
+      let inputDato = document.getElementById('cost'+ (xinp + 1))
+      inputDato.value = listaPrecios.producto[xinp].costo
+      inputDato = document.getElementById('cant'+ (xinp + 1))
+      inputDato.value = listaPrecios.producto[xinp].cantidad
+    }
+    for (let articulo = 1; articulo <= nArticulos; articulo++) {
+      const inputsProduct = productosParent.children[ix + articulo].querySelectorAll('input')      
+      inputsProduct.forEach( input => {
+          input.addEventListener('focusout', actulizarLista)
+          input.addEventListener('keyup', logKey)
+      })
+    }
   }  
 }
 
@@ -148,34 +159,38 @@ inputArticulos.addEventListener('focusout', () => {
     fProductos()
 })
 inputArticulos.addEventListener('keyup', (key) => {
-  if (key.key === "Enter" & inputArticulos.value)
-    fProductos()
+  if (key.key === "Enter") 
+    if (inputArticulos.value) {
+      fProductos()
+  }
 })
 
 inputCosto.addEventListener('focusout', () => {
   if (inputCosto.value)
-    listaPrecios.costo = inputCosto.value
+    listaPrecios.costo = parseFloat(inputCosto.value)
 })
 inputCosto.addEventListener('keyup', (key) => {
-  if (key.key === "Enter" & inputCosto.value)
-    listaPrecios.costo = inputCosto.value
+  if (key.key === "Enter") 
+    if (inputCosto.value)
+      listaPrecios.costo = parseFloat(inputCosto.value)
 })
 
 inputEnvio.addEventListener('focusout', () => {
   if (inputEnvio.value)
-    listaPrecios.envio = inputEnvio.value
+    listaPrecios.envio = parseFloat(inputEnvio.value)
 })
 
-inputEnvio.addEventListener('keyup', (key) => {
-  if (key.key === "Enter" & inputEnvio.value) {
-    listaPrecios.envio = inputEnvio.value
-    const listPrcios = productosParent.getElementsByClassName('cant')
-    if (listPrcios.length > 0) {
-      for(let producto of listPrcios) {
-        actulizarLista(producto)
+inputEnvio.addEventListener('keyup', (key) => {  
+  if (key.key === "Enter") 
+    if (inputEnvio.value) {      
+      listaPrecios.envio = parseFloat(inputEnvio.value)
+      const listPrcios = productosParent.getElementsByClassName('cant')
+      if (listPrcios.length > 0) {
+        for(let producto of listPrcios) {
+          actulizarLista(producto)
+        }
       }
     }
-  }
 })
 
 inputGanacia.addEventListener('focusout', () => {
@@ -184,13 +199,14 @@ inputGanacia.addEventListener('focusout', () => {
 })
 
 inputGanacia.addEventListener('keyup', (key) => {
-  if (key.key === "Enter" & inputGanacia.value) {
-    listaPrecios.ganancia = inputGanacia.value
-    const listPrcios = productosParent.getElementsByClassName('cant')
-    if (listPrcios.length > 0) {
-      for(let producto of listPrcios) {
-        actulizarLista(producto)
+  if (key.key === "Enter")
+    if (inputGanacia.value) {    
+      listaPrecios.ganancia = inputGanacia.value
+      const listPrcios = productosParent.getElementsByClassName('cant')
+      if (listPrcios.length > 0) {
+        for(let producto of listPrcios) {
+          actulizarLista(producto)
+        }
       }
     }
-  }
 })

@@ -27,7 +27,7 @@
           <input type="number" id="envio" name="envio" min="0">
         </label>  
         <label for="ganancia"><span>Ganancia (%):<span class="requerido">*</span></span>
-          <input type="number" id="ganancia" name="ganancia" min="1" required>
+          <input type="number" id="porcentajeGanancia" name="ganancia" min="1" required>
         </label>
       </div>
     </fieldset>
@@ -49,6 +49,15 @@
           <div class="cel">Costo <small>unitario</small></div>
           <div class="cel">Precio <small>venta</small></div>
         </div>        
+      </div>
+
+      <div class="table">
+        <div class="row ganancia" id="ganancia" style="display: none">
+          <div class="cel"></div>
+          <div class="cel"></div>
+          <div class="cel" style="grid-column: span 2;">Ganancia Total</div>
+          <div class="cel"><span>Ganancia Total</span>$</div>
+        </div>
       </div>
            
     </fieldset>
